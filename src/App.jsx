@@ -26,7 +26,29 @@ const products = productsFromServer.map(product => {
   };
 });
 
-function getVisibleProducts(goods, selectedUser, byQuery) {
+const preparedCategoryTitle = [];
+
+function getCategories(selectedTitle) {
+  if (!selectedTitle) {
+    return categoriesFromServer.map(({ title }) => title);
+  }
+
+  if (preparedCategoryTitle.includes(selectedTitle)) {
+    const index = preparedCategoryTitle.indexOf(selectedTitle);
+
+    preparedCategoryTitle.splice(index, 1);
+
+    return preparedCategoryTitle;
+  }
+
+  preparedCategoryTitle.push(selectedTitle);
+
+  console.log(preparedCategoryTitle);
+
+  return preparedCategoryTitle;
+}
+
+function getVisibleProducts(goods, selectedUser, byQuery, categoryTitle) {
   let preparedProducts = [...goods];
 
   if (selectedUser) {
@@ -41,21 +63,44 @@ function getVisibleProducts(goods, selectedUser, byQuery) {
     );
   }
 
+  if (categoryTitle.length !== 0) {
+    preparedProducts = preparedProducts.filter(({ category }) =>
+      categoryTitle.includes(category.title),
+    );
+  }
+
   return preparedProducts;
 }
 
 export const App = () => {
   const [choosenUser, setChoosenUser] = useState('');
   const [query, setQuery] = useState('');
-  const visibleProducts = getVisibleProducts(products, choosenUser, query);
+  const [selectCategory, setSelectCategories] = useState('');
+  const categoryTitles = getCategories();
+
+  const visibleProducts = getVisibleProducts(
+    products,
+    choosenUser,
+    query,
+    categoryTitles,
+  );
 
   function clearQuery() {
     setQuery('');
   }
 
-  function reset() {
+  function clearСhoosenUser() {
     setChoosenUser('');
-    setQuery('');
+  }
+
+  function clearSelectCategory() {
+    setSelectCategories('');
+  }
+
+  function reset() {
+    clearQuery();
+    clearСhoosenUser();
+    clearSelectCategory();
   }
 
   return (
@@ -72,7 +117,7 @@ export const App = () => {
                 data-cy="FilterAllUsers"
                 href="#/"
                 className={cn({ 'is-active': choosenUser === '' })}
-                onClick={() => setChoosenUser('')}
+                onClick={clearСhoosenUser}
               >
                 All
               </a>
@@ -125,44 +170,27 @@ export const App = () => {
               <a
                 href="#/"
                 data-cy="AllCategories"
-                className="button is-success mr-6 is-outlined"
+                className={cn('button is-success mr-6 ', {
+                  'is-outlined': selectCategory,
+                })}
+                onClick={clearSelectCategory}
               >
                 All
               </a>
 
-              {categoriesFromServer.map(category => (
+              {categoriesFromServer.map(({ id, title }) => (
                 <a
-                  key={category.id}
+                  key={id}
                   data-cy="Category"
-                  className="button mr-2 my-1"
+                  className={cn('button mr-2 my-1', {
+                    'is-info': categoryTitles.includes(title) && selectCategory,
+                  })}
                   href="#/"
+                  onClick={() => setSelectCategories(title)}
                 >
-                  {category.title}
+                  {title}
                 </a>
               ))}
-
-              {/* <a
-              data-cy="Category"
-              className="button mr-2 my-1 is-info"
-              href="#/"
-            >
-              Category 1
-            </a>
-
-            <a data-cy="Category" className="button mr-2 my-1" href="#/">
-              Category 2
-            </a>
-
-            <a
-              data-cy="Category"
-              className="button mr-2 my-1 is-info"
-              href="#/"
-            >
-              Category 3
-            </a>
-            <a data-cy="Category" className="button mr-2 my-1" href="#/">
-              Category 4
-            </a> */}
             </div>
 
             <div className="panel-block">
