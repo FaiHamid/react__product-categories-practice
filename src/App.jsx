@@ -50,7 +50,12 @@ export const App = () => {
   const visibleProducts = getVisibleProducts(products, choosenUser, query);
 
   function clearQuery() {
-    return setQuery('');
+    setQuery('');
+  }
+
+  function reset() {
+    setChoosenUser('');
+    setQuery('');
   }
 
   return (
@@ -165,6 +170,7 @@ export const App = () => {
                 data-cy="ResetAllButton"
                 href="#/"
                 className="button is-link is-outlined is-fullwidth"
+                onClick={reset}
               >
                 Reset all filters
               </a>
