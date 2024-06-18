@@ -26,7 +26,7 @@ const products = productsFromServer.map(product => {
   };
 });
 
-function getVisibleProducts(goods, selectedUser) {
+function getVisibleProducts(goods, selectedUser, byQuery) {
   let preparedProducts = [...goods];
 
   if (selectedUser) {
@@ -35,12 +35,23 @@ function getVisibleProducts(goods, selectedUser) {
     );
   }
 
+  if (byQuery) {
+    preparedProducts = preparedProducts.filter(({ name }) =>
+      name.toLowerCase().includes(byQuery.toLowerCase()),
+    );
+  }
+
   return preparedProducts;
 }
 
 export const App = () => {
   const [choosenUser, setChoosenUser] = useState('');
-  const visibleProducts = getVisibleProducts(products, choosenUser);
+  const [query, setQuery] = useState('');
+  const visibleProducts = getVisibleProducts(products, choosenUser, query);
+
+  function clearQuery() {
+    return setQuery('');
+  }
 
   return (
     <div className="section">
@@ -81,7 +92,10 @@ export const App = () => {
                   type="text"
                   className="input"
                   placeholder="Search"
-                  value="qwe"
+                  value={query}
+                  onChange={event => {
+                    setQuery(event.target.value);
+                  }}
                 />
 
                 <span className="icon is-left">
@@ -90,11 +104,14 @@ export const App = () => {
 
                 <span className="icon is-right">
                   {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
-                  <button
-                    data-cy="ClearButton"
-                    type="button"
-                    className="delete"
-                  />
+                  {query && (
+                    <button
+                      data-cy="ClearButton"
+                      type="button"
+                      className="delete"
+                      onClick={clearQuery}
+                    />
+                  )}
                 </span>
               </p>
             </div>
